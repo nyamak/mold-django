@@ -1,0 +1,17 @@
+# Django
+Django==3.1
+
+# Django Rest Framework
+djangorestframework==3.11.1
+
+# PostgreSQL
+psycopg2==2.8.5
+
+# Other dependencies
+gunicorn==20.0.4
+django-dotenv==1.4.2
+dj-database-url==0.5.0
+pytz==2020.1
+whitenoise==5.2.0
+sqlparse==0.3.1
+django-heroku==0.3.1
