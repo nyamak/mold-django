@@ -2,6 +2,7 @@
 Data models
 """
 from django.contrib.auth.models import User
+from django.core import validators
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -41,6 +42,26 @@ class Device(models.Model):
         related_name='devices',
     )
 
+    latitude = models.FloatField(
+        verbose_name=_('latitude'),
+        blank=True,
+        null=True,
+        validators=[
+            validators.MinValueValidator(-90.0),
+            validators.MaxValueValidator(90.0),
+        ]
+    )
+
+    longitude = models.FloatField(
+        verbose_name=_('longitude'),
+        blank=True,
+        null=True,
+        validators=[
+            validators.MinValueValidator(-180.0),
+            validators.MaxValueValidator(180.0),
+        ]
+    )
+
     created_at = models.DateTimeField(
         verbose_name=_('Data de criação'),
         auto_now_add=True,
@@ -67,10 +88,23 @@ class Measurement(models.Model):
         related_name='measurements',
     )
 
+    humidity = models.FloatField(
+        verbose_name=_('umidade'),
+        null=True,
+    )
+
+    temperature = models.FloatField(
+        verbose_name=_('temperatura'),
+        null=True,
+    )
+
     date = models.DateTimeField(
         verbose_name=_('Data'),
         auto_now_add=True,
     )
+
+    def __str__(self):
+        return f'{self.device} - {self.date}'
 
     class Meta:
         verbose_name = _('Medição')
