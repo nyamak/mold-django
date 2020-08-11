@@ -1,2 +1,2 @@
 release: python manage.py migrate
-web: gunicorn peteel.wsgi --log-file -
+web: gunicorn settings.wsgi --log-file -
