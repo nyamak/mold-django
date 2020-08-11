@@ -98,6 +98,13 @@ class Measurement(models.Model):
         null=True,
     )
 
+    payload = models.CharField(
+        verbose_name=_('pacote de dados'),
+        blank=True,
+        null=True,
+        max_length=256,
+    )
+
     date = models.DateTimeField(
         verbose_name=_('Data'),
         auto_now_add=True,
