@@ -15,6 +15,8 @@ class Device(models.Model):
     name = models.CharField(
         verbose_name=_('Nome'),
         max_length=64,
+        null=True,
+        blank=True
     )
 
     device_eui = models.CharField(
@@ -40,6 +42,8 @@ class Device(models.Model):
         verbose_name=_('Proprietário'),
         on_delete=models.CASCADE,
         related_name='devices',
+        null=True,
+        blank=True,
     )
 
     latitude = models.FloatField(
@@ -77,7 +81,7 @@ class Device(models.Model):
         verbose_name_plural = _('Dispositivos')
 
     def __str__(self):
-        return self.name
+        return self.device_eui
 
 
 class Measurement(models.Model):
