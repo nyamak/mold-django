@@ -102,7 +102,7 @@ class Measurement(models.Model):
         verbose_name=_('pacote de dados'),
         blank=True,
         null=True,
-        max_length=256,
+        max_length=4096,
     )
 
     date = models.DateTimeField(
