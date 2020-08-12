@@ -15,5 +15,5 @@ class DeviceAdmin(admin.ModelAdmin):
 
 @admin.register(models.Measurement)
 class MeasurementAdmin(admin.ModelAdmin):
-    list_display = ('device', 'temperature', 'humidity', 'date', )
+    list_display = ('device', 'temperature', 'humidity', 'date', 'payload',)
     list_filter = ('device', )
