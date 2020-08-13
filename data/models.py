@@ -4,6 +4,8 @@ Data models
 from django.contrib.auth.models import User
 from django.core import validators
 from django.db import models
+from django.db.models import Avg
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 
@@ -102,6 +104,12 @@ class Measurement(models.Model):
         null=True,
     )
 
+    mold_growth = models.FloatField(
+        verbose_name=_('crescimento esperado de mofo'),
+        null=True,
+        blank=True,
+    )
+
     payload = models.CharField(
         verbose_name=_('pacote de dados'),
         blank=True,
@@ -116,6 +124,22 @@ class Measurement(models.Model):
 
     def __str__(self):
         return f'{self.device} - {self.date}'
+
+    def save(self, *args, **kwargs):
+        # Calculates the average measurements from past 7 days
+        week_ago = timezone.now() - timezone.timedelta(days=7)
+        measurements = Measurement.objects.filter(date__gte=week_ago).aggregate(
+            Avg('humidity'), Avg('temperature'),)
+        humidity_average = measurements.get('humidity__avg')
+        temperature_average = measurements.get('temperature__avg')
+        if humidity_average < 80.0:
+            self.mold_growth = 0
+        else:
+            # Parameters taken from a linear regression
+            self.mold_growth = (-6344.226743197284
+                                + 79.29438776*humidity_average
+                                + 6.259375*temperature_average)
+        return super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = _('Medição')
