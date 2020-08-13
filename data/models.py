@@ -1,10 +1,13 @@
 """
 Data models
 """
+from statistics import mean
+
 from django.contrib.auth.models import User
 from django.core import validators
 from django.db import models
 from django.db.models import Avg
+from django.db.models.functions import TruncDate
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -128,10 +131,16 @@ class Measurement(models.Model):
     def save(self, *args, **kwargs):
         # Calculates the average measurements from past 7 days
         week_ago = timezone.now() - timezone.timedelta(days=7)
-        measurements = Measurement.objects.filter(date__gte=week_ago).aggregate(
-            Avg('humidity'), Avg('temperature'),)
-        humidity_average = measurements.get('humidity__avg')
-        temperature_average = measurements.get('temperature__avg')
+        measurements = list(Measurement
+                            .objects
+                            .filter(temperature__isnull=False, humidity__isnull=False, device=self.device,
+                                    date__gte=week_ago)
+                            .values(trunc_date=TruncDate('date'))
+                            .annotate(Avg('temperature'), Avg('humidity'))
+                            .order_by('trunc_date'))
+
+        humidity_average = mean([day.get('humidity__avg') for day in measurements])
+        temperature_average = mean([day.get('temperature__avg') for day in measurements])
         if humidity_average < 80.0:
             self.mold_growth = 0
         else:
