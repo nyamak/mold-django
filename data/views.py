@@ -10,6 +10,8 @@ from data import models
 @csrf_exempt
 def receive_data(request):
     try:
+        if models.Measurement.objects.filter(payload__exact=request.body).exists():
+            raise Exception('Duplicate payload')
         payload = json.loads(request.body)
         meta = payload.get('meta')
         device, _ = models.Device.objects.get_or_create(
