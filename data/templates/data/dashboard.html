@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div style="width: 50%; height: 200px; float: right">
+  <canvas id="productsChart" width="50%" height="50%"></canvas>
+  </div>
+  <div style="width: 50%; height: 200px; float:left">
+  <h1>Dashboard</h1>
+  <h2>Dispositivo: {{ latest_measurement.device.device_eui }}</h2>
+  <h2>Última medição:</h2>
+    <ul>
+      <li><b>Temperatura</b>: {{ latest_measurement.temperature }} ºC</li>
+      <li><b>Humidade</b>: {{ latest_measurement.humidity }} %</li>
+      <li><b>Data</b>: {{ latest_measurement.date }}</li>
+      <li><b>Crescimento de mofo</b>: {{ latest_measurement.mold_growth|floatformat }} mm/h</li>
+    </ul>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+var ctx = document.getElementById("productsChart");
+
+var productsChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: {{ labels|safe }},
+        datasets: [{
+            label: 'Temperatura',
+            yAxisID: 'Temperatura',
+            data: {{ temp_data|safe }},
+            backgroundColor: 'red',
+            borderColor: 'red',
+            fill: false,
+        },{
+            label: 'Umidade',
+            yAxisID: 'Umidade',
+            data: {{ hum_data|safe }},
+            backgroundColor: 'blue',
+            borderColor: 'blue',
+            fill: false,
+        }]
+    },
+    options: {
+        scales: {
+            yAxes: [{
+                id: 'Temperatura',
+                type: 'linear',
+                position: 'left',
+                ticks: {
+                  max: 30,
+                  min: 0
+                },
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Temperatura'
+                },
+            }, {
+                id: 'Umidade',
+                type: 'linear',
+                position: 'right',
+                ticks: {
+                  max: 100,
+                  min: 0
+                },
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Umidade',
+                },
+            }],
+            xAxes: [
+                {scaleLabel: {
+                    display: true,
+                    labelString: 'Data'
+                    },
+                }
+            ]
+        }
+    }
+});
+</script>
+{% endblock %}

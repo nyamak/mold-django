@@ -1,7 +1,11 @@
 import base64
 import json
 
+from django.db.models import Avg
+from django.db.models.functions import TruncDate
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, render
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
 from data import models
@@ -31,3 +35,28 @@ def receive_data(request):
         return HttpResponse(status=204)
     except BaseException:
         return HttpResponse(status=400)
+
+
+@csrf_exempt
+def device_dashboard(request, device_eui):
+    queryset = models.Measurement.objects.filter(device__device_eui=device_eui).order_by('date')
+
+    week_ago = timezone.now() - timezone.timedelta(days=7)
+    measurements = list(models.Measurement
+                        .objects
+                        .filter(temperature__isnull=False, humidity__isnull=False, device__device_eui=device_eui,
+                                date__gte=week_ago)
+                        .values(trunc_date=TruncDate('date'))
+                        .annotate(Avg('temperature'), Avg('humidity'))
+                        .order_by('trunc_date'))
+    labels = [str(day.get('trunc_date')) for day in measurements]
+    temp_data = [day.get('temperature__avg') for day in measurements]
+    hum_data = [day.get('humidity__avg') for day in measurements]
+
+    latest_measurement = queryset.last()
+    return render(request, 'data/dashboard.html', context={
+        'latest_measurement': latest_measurement,
+        'labels': labels,
+        'temp_data': temp_data,
+        'hum_data': hum_data,
+    })
