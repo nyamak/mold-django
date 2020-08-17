@@ -47,11 +47,12 @@ def device_dashboard(request, device_eui):
                         .filter(temperature__isnull=False, humidity__isnull=False, device__device_eui=device_eui,
                                 date__gte=week_ago)
                         .values(trunc_date=TruncDate('date'))
-                        .annotate(Avg('temperature'), Avg('humidity'))
+                        .annotate(Avg('temperature'), Avg('humidity'), Avg('mold_growth'))
                         .order_by('trunc_date'))
     labels = [str(day.get('trunc_date')) for day in measurements]
     temp_data = [day.get('temperature__avg') for day in measurements]
     hum_data = [day.get('humidity__avg') for day in measurements]
+    growth_data = [day.get('mold_growth__avg') if isinstance(day.get('mold_growth__avg'), float) else 0 for day in measurements]
 
     latest_measurement = queryset.last()
     return render(request, 'data/dashboard.html', context={
@@ -59,4 +60,5 @@ def device_dashboard(request, device_eui):
         'labels': labels,
         'temp_data': temp_data,
         'hum_data': hum_data,
+        'growth_data': growth_data,
     })
