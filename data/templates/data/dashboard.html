@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div>
+    <h1 style="font-family: 'Poppins', sans-serif; text-align: center;">Dashboard - BoLoRa</h1>
+    <h2 style="font-family: 'Roboto', sans-serif;">Dispositivo: {{ latest_measurement.device.device_eui }}</h2>
+    <h2 style="font-family: 'Roboto', sans-serif;">Última medição:</h2>
+    <ul style="font-family: 'Roboto', sans-serif;">
+      <li><b>Temperatura</b>: {{ latest_measurement.temperature }} ºC</li>
+      <li><b>Umidade</b>: {{ latest_measurement.humidity }} %</li>
+      <li><b>Data</b>: {{ latest_measurement.date }}</li>
+      <li><b>Crescimento de mofo</b>: {{ latest_measurement.mold_growth|floatformat }} mm/h</li>
+    </ul>
+  </div>
+  <div style="width: 33%; float: left">
+    <canvas id="temperatureChart" width="33%" height="33%"></canvas>
+  </div>
+  <div style="width: 33%; float: left">
+    <canvas id="humidityChart" width="33%" height="33%"></canvas>
+  </div>
+  <div style="width: 33%; float: left">
+    <canvas id="growthChart" width="33%" height="33%"></canvas>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+var ctxTemp = document.getElementById("temperatureChart");
+
+var temperatureChart = new Chart(ctxTemp, {
+    type: 'line',
+    data: {
+        labels: {{ labels|safe }},
+        datasets: [{
+            label: 'Temperatura',
+            yAxisID: 'Temperatura',
+            data: {{ temp_data|safe }},
+            backgroundColor: 'red',
+            borderColor: 'red',
+            fill: false,
+        }]
+    },
+    options: {
+        scales: {
+            yAxes: [{
+                id: 'Temperatura',
+                type: 'linear',
+                position: 'left',
+                ticks: {
+                  max: 30,
+                  min: 0
+                },
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Temperatura [ºC]'
+                },
+            }],
+            xAxes: [
+                {scaleLabel: {
+                    display: true,
+                    labelString: 'Data'
+                    },
+                }
+            ]
+        }
+    }
+});
+var ctxHum = document.getElementById("humidityChart");
+
+var humidityChart = new Chart(ctxHum, {
+    type: 'line',
+    data: {
+        labels: {{ labels|safe }},
+        datasets: [{
+            label: 'Umidade',
+            yAxisID: 'Umidade',
+            data: {{ hum_data|safe }},
+            backgroundColor: 'blue',
+            borderColor: 'blue',
+            fill: false,
+        }]
+    },
+    options: {
+        scales: {
+            yAxes: [{
+                id: 'Umidade',
+                type: 'linear',
+                position: 'left',
+                ticks: {
+                  max: 100,
+                  min: 0
+                },
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Umidade [%]',
+                },
+            }],
+            xAxes: [
+                {scaleLabel: {
+                    display: true,
+                    labelString: 'Data'
+                    },
+                }
+            ]
+        }
+    }
+});
+
+var ctxGrowth = document.getElementById("growthChart");
+
+var growthChart = new Chart(ctxGrowth, {
+    type: 'line',
+    data: {
+        labels: {{ labels|safe }},
+        datasets: [{
+            label: 'Crescimento de mofo',
+            yAxisID: 'Crescimento',
+            data: {{ growth_data|safe }},
+            backgroundColor: 'green',
+            borderColor: 'green',
+            fill: false,
+        }]
+    },
+    options: {
+        scales: {
+            yAxes: [{
+                id: 'Crescimento',
+                type: 'linear',
+                position: 'left',
+                ticks: {
+                  max: 1000,
+                  min: 0
+                },
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Crescimento de mofo [mm/h]'
+                },
+            }],
+            xAxes: [
+                {scaleLabel: {
+                    display: true,
+                    labelString: 'Data'
+                    },
+                }
+            ]
+        }
+    }
+});
+</script>
+{% endblock %}
